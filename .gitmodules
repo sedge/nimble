@@ -36,4 +36,5 @@
 	url = https://github.com/KeniMorri/HTMLHinter
 [submodule "src/extensions/default/brackets-browser-livedev"]
 	path = src/extensions/default/brackets-browser-livedev
-	url = https://github.com/humphd/brackets-browser-livedev.git
+	url = https://github.com/sedge/brackets-browser-livedev.git
+	branch = gruntTesting
