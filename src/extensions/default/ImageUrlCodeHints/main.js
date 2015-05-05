@@ -39,7 +39,7 @@ define(function (require, exports, module) {
 
         Data            = require("text!data.json"),
 
-        urlHints,
+        imageUrlHints,
         data,
         htmlAttrs,
         styleModes      = ["css", "text/x-less", "text/x-scss"];
@@ -187,8 +187,6 @@ define(function (require, exports, module) {
             return self.cachedHints.deferred;
         }
 
-        // build list
-
         // without these entries, typing "../" will not display entries for containing folder
         if (queryUrl.filename === ".") {
             result.push(queryDir + ".");
@@ -203,8 +201,8 @@ define(function (require, exports, module) {
 
         // TODO: filter by desired file type based on tag, type attr, etc.
 
-        // TODO: add list item to top of list to popup modal File Finder dialog
-        // New string: "Browse..." or "Choose a File..."
+        // TODO: add list item to bottom of list to display selfie interface
+        // New string: "Take a selfie"
         // Command: Commands.FILE_OPEN
 
         return result;
@@ -285,13 +283,21 @@ define(function (require, exports, module) {
 
         this.info = CSSUtils.getInfoAtPos(editor, cursor);
 
-        if (this.info.context !== CSSUtils.PROP_VALUE && this.info.context !== CSSUtils.IMPORT_URL) {
+        // If this isn't a CSS property value we abort
+        if (this.info.context !== CSSUtils.PROP_VALUE) {
             return false;
         }
 
-        // collect existing value
-        var i,
-            val = "";
+        // We're only interested in the background property
+        if (this.info.name !== "background") {
+            return false;
+        }
+// XXXsedge: Confirm that this picks up `background: url(` before triggering hinting
+
+        if (this.info.)
+
+        var i;
+        var val = "";
 
         for (i = 0; i <= this.info.index && i < this.info.values.length; i++) {
             if (i < this.info.index) {
@@ -302,11 +308,11 @@ define(function (require, exports, module) {
         }
 
         // starts with "url(" ?
-        if (val.match(/^\s*url\(/i)) {
-            return true;
+        if (!val.match(/^\s*url\(/i)) {
+            return false;
         }
 
-        return false;
+        return true;
     };
 
     /**
@@ -788,13 +794,13 @@ define(function (require, exports, module) {
 
     function _clearCachedHints() {
         // Verify cache exists and is not deferred
-        if (urlHints && urlHints.cachedHints && urlHints.cachedHints.deferred &&
-                urlHints.cachedHints.deferred.state() !== "pending") {
+        if (imageUrlHints && imageUrlHints.cachedHints && imageUrlHints.cachedHints.deferred &&
+                imageUrlHints.cachedHints.deferred.state() !== "pending") {
 
             // Cache may or may not be stale. Main benefit of cache is to limit async lookups
             // during typing. File tree updates cannot happen during typing, so it's probably
             // not worth determining whether cache may still be valid. Just delete it.
-            urlHints.cachedHints = null;
+            imageUrlHints.cachedHints = null;
         }
     }
 
@@ -802,13 +808,10 @@ define(function (require, exports, module) {
         data            = JSON.parse(Data);
         htmlAttrs       = data.htmlAttrs;
 
-        urlHints        = new ImageUrlCodeHints();
-        CodeHintManager.registerHintProvider(urlHints, ["css", "html", "less", "scss"], 5);
+        imageUrlHints        = new ImageUrlCodeHints();
+        CodeHintManager.registerHintProvider(imageUrlHints, ["css", "html", "less", "scss"], 100);
 
         FileSystem.on("change", _clearCachedHints);
         FileSystem.on("rename", _clearCachedHints);
-
-        // For unit testing
-        exports.hintProvider = urlHints;
     });
 });
