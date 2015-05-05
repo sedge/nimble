@@ -26,7 +26,7 @@
 
 define(function (require, exports, module) {
     "use strict";
-    
+
     // Brackets modules
     var AppInit         = brackets.getModule("utils/AppInit"),
         CodeHintManager = brackets.getModule("editor/CodeHintManager"),
@@ -43,11 +43,11 @@ define(function (require, exports, module) {
         data,
         htmlAttrs,
         styleModes      = ["css", "text/x-less", "text/x-scss"];
-    
+
     /**
      * @constructor
      */
-    function UrlCodeHints() {}
+    function ImageUrlCodeHints() {}
 
     /**
      * Helper function to create a list of urls to existing files based on the query.
@@ -55,7 +55,7 @@ define(function (require, exports, module) {
      *
      * @return {Array.<string>|$.Deferred} The (possibly deferred) hints.
      */
-    UrlCodeHints.prototype._getUrlList = function (query) {
+    ImageUrlCodeHints.prototype._getUrlList = function (query) {
         var directory,
             doc,
             docDir,
@@ -72,7 +72,7 @@ define(function (require, exports, module) {
         }
 
         docDir = FileUtils.getDirectoryPath(doc.file.fullPath);
-        
+
         // get relative path from query string
         queryUrl = window.PathUtils.parseUrl(query.queryStr);
         if (queryUrl) {
@@ -159,7 +159,7 @@ define(function (require, exports, module) {
                     self.cachedHints.query      = query;
                     self.cachedHints.queryDir   = queryDir;
                     self.cachedHints.docDir     = docDir;
-                    
+
                     if (self.cachedHints.deferred.state() !== "rejected") {
                         currentDeferred = self.cachedHints.deferred;
 
@@ -173,7 +173,7 @@ define(function (require, exports, module) {
                             if (currentDeferred && currentDeferred.state() === "pending") {
                                 currentDeferred.reject();
                             }
-                            
+
                             if (self.cachedHints.deferred &&
                                     self.cachedHints.deferred.state() === "pending") {
                                 self.cachedHints.deferred.reject();
@@ -219,22 +219,22 @@ define(function (require, exports, module) {
      * @return {{hints: (Array.<string>|$.Deferred), sortFunc: ?function(string, string): number}}
      * The (possibly deferred) hints and the sort function to use on thise hints.
      */
-    UrlCodeHints.prototype._getUrlHints = function (query) {
+    ImageUrlCodeHints.prototype._getUrlHints = function (query) {
         var hints = [],
             sortFunc = null;
 
         // Do not show hints after "?" in url
         if (query.queryStr.indexOf("?") === -1) {
-            
+
             // Default behavior for url hints is do not close on select.
             this.closeOnSelect = false;
             hints = this._getUrlList(query);
             sortFunc = StringUtils.urlSort;
         }
-        
+
         return { hints: hints, sortFunc: sortFunc };
     };
-    
+
     /**
      * Determines whether url hints are available in the current editor
      * context.
@@ -252,7 +252,7 @@ define(function (require, exports, module) {
      * the given editor context and, in case implicitChar is non-null,
      * whether it is appropriate to do so.
      */
-    UrlCodeHints.prototype.hasHints = function (editor, implicitChar) {
+    ImageUrlCodeHints.prototype.hasHints = function (editor, implicitChar) {
         var mode = editor.getModeForSelection();
         if (mode === "html") {
             return this.hasHtmlHints(editor, implicitChar);
@@ -279,7 +279,7 @@ define(function (require, exports, module) {
      * the given editor context and, in case implicitChar is non-null,
      * whether it is appropriate to do so.
      */
-    UrlCodeHints.prototype.hasCssHints = function (editor, implicitChar) {
+    ImageUrlCodeHints.prototype.hasCssHints = function (editor, implicitChar) {
         this.editor = editor;
         var cursor = this.editor.getCursorPos();
 
@@ -300,7 +300,7 @@ define(function (require, exports, module) {
                 val += this.info.values[i].substring(0, this.info.offset);
             }
         }
-        
+
         // starts with "url(" ?
         if (val.match(/^\s*url\(/i)) {
             return true;
@@ -325,22 +325,22 @@ define(function (require, exports, module) {
      * the given editor context and, in case implicitChar is non-null,
      * whether it is appropriate to do so.
      */
-    UrlCodeHints.prototype.hasHtmlHints = function (editor, implicitChar) {
+    ImageUrlCodeHints.prototype.hasHtmlHints = function (editor, implicitChar) {
         var tagInfo,
             query,
             tokenType;
 
         this.editor = editor;
-        
+
         tagInfo = HTMLUtils.getTagInfo(editor, editor.getCursorPos());
         query = null;
         tokenType = tagInfo.position.tokenType;
-        
+
         if (tokenType === HTMLUtils.ATTR_VALUE) {
-                
+
             // Verify that attribute name has hintable values
             if (htmlAttrs[tagInfo.attr.name]) {
-                
+
                 if (tagInfo.position.offset >= 0) {
                     query = tagInfo.attr.value.slice(0, tagInfo.position.offset);
                 } else {
@@ -349,7 +349,7 @@ define(function (require, exports, module) {
                     // So just set the queryStr to an empty string.
                     query = "";
                 }
-                
+
                 var hintsAndSortFunc = this._getUrlHints({queryStr: query}),
                     hints = hintsAndSortFunc.hints;
 
@@ -393,7 +393,7 @@ define(function (require, exports, module) {
      * 4. handleWideResults, a boolean (or undefined) that indicates whether
      *    to allow result string to stretch width of display.
      */
-    UrlCodeHints.prototype.getHints = function (key) {
+    ImageUrlCodeHints.prototype.getHints = function (key) {
         var mode = this.editor.getModeForSelection(),
             cursor = this.editor.getCursorPos(),
             filter = "",
@@ -409,7 +409,7 @@ define(function (require, exports, module) {
             if (tokenType !== HTMLUtils.ATTR_VALUE || !htmlAttrs[tagInfo.attr.name]) {
                 return null;
             }
-            
+
             if (tagInfo.position.offset >= 0) {
                 query.queryStr = tagInfo.attr.value.slice(0, tagInfo.position.offset);
             }
@@ -447,7 +447,7 @@ define(function (require, exports, module) {
                 } else {
                     this.info.leadingWhitespace = null;
                 }
-                
+
                 // Keep track of opening quote and strip it
                 if (val.match(/^["']/)) {
                     this.info.openingQuote = val[0];
@@ -523,12 +523,12 @@ define(function (require, exports, module) {
      * Indicates whether the manager should follow hint insertion with an
      * additional explicit hint request.
      */
-    UrlCodeHints.prototype.insertHint = function (completion) {
+    ImageUrlCodeHints.prototype.insertHint = function (completion) {
         var mode = this.editor.getModeForSelection();
-        
+
         // Encode the string just prior to inserting the hint into the editor
         completion = encodeURI(completion);
-        
+
         if (mode === "html") {
             return this.insertHtmlHint(completion);
         } else if (styleModes.indexOf(mode) > -1) {
@@ -553,16 +553,16 @@ define(function (require, exports, module) {
      * @return {number}
      * Number of characters between 2 positions
      */
-    UrlCodeHints.prototype.getCharOffset = function (array, pos1, pos2) {
+    ImageUrlCodeHints.prototype.getCharOffset = function (array, pos1, pos2) {
         var i, count = 0;
-        
+
         if (pos1.index === pos2.index) {
             return (pos2.offset >= pos1.offset) ? (pos2.offset - pos1.offset) : 0;
         } else if (pos1.index < pos2.index) {
             if (pos1.index < 0 || pos1.index >= array.length || pos2.index < 0 || pos2.index >= array.length) {
                 return 0;
             }
-            
+
             for (i = pos1.index; i <= pos2.index; i++) {
                 if (i === pos1.index) {
                     count += (array[i].length - pos1.offset);
@@ -573,7 +573,7 @@ define(function (require, exports, module) {
                 }
             }
         }
-        
+
         return count;
     };
 
@@ -590,13 +590,13 @@ define(function (require, exports, module) {
      * @return {{index: number, offset: number}}
      * Index of array, and offset in string where char found.
      */
-    UrlCodeHints.prototype.findNextPosInArray = function (array, ch, pos) {
+    ImageUrlCodeHints.prototype.findNextPosInArray = function (array, ch, pos) {
         var i, o, searchOffset;
         for (i = pos.index; i < array.length; i++) {
             // Only use offset on index, then offset of 0 after that
             searchOffset = (i === pos.index) ? pos.offset : 0;
             o = array[i].indexOf(ch, searchOffset);
-            
+
             if (o !== -1) {
                 return { index: i, offset: o };
             }
@@ -614,7 +614,7 @@ define(function (require, exports, module) {
      * Indicates whether the manager should follow hint insertion with an
      * additional explicit hint request.
      */
-    UrlCodeHints.prototype.insertCssHint = function (completion) {
+    ImageUrlCodeHints.prototype.insertCssHint = function (completion) {
         var cursor = this.editor.getCursorPos(),
             start  = { line: cursor.line, ch: cursor.ch },
             end    = { line: cursor.line, ch: cursor.ch };
@@ -718,7 +718,7 @@ define(function (require, exports, module) {
      * Indicates whether the manager should follow hint insertion with an
      * additional explicit hint request.
      */
-    UrlCodeHints.prototype.insertHtmlHint = function (completion) {
+    ImageUrlCodeHints.prototype.insertHtmlHint = function (completion) {
         var cursor = this.editor.getCursorPos(),
             start = {line: -1, ch: -1},
             end = {line: -1, ch: -1},
@@ -737,7 +737,7 @@ define(function (require, exports, module) {
                 // Insert folder names, but replace file names
                 shouldReplace = true;
             }
-            
+
             if (!tagInfo.attr.hasEndQuote) {
                 endQuote = tagInfo.attr.quoteChar;
                 if (endQuote) {
@@ -777,12 +777,12 @@ define(function (require, exports, module) {
             }
             return true;
         }
-        
+
         if (tokenType === HTMLUtils.ATTR_VALUE && tagInfo.attr.hasEndQuote) {
             // Move the cursor to the right of the existing end quote after value insertion.
             this.editor.setCursorPos(start.line, start.ch + completion.length + 1);
         }
-        
+
         return false;
     };
 
@@ -797,14 +797,14 @@ define(function (require, exports, module) {
             urlHints.cachedHints = null;
         }
     }
-        
+
     AppInit.appReady(function () {
         data            = JSON.parse(Data);
         htmlAttrs       = data.htmlAttrs;
 
-        urlHints        = new UrlCodeHints();
+        urlHints        = new ImageUrlCodeHints();
         CodeHintManager.registerHintProvider(urlHints, ["css", "html", "less", "scss"], 5);
-        
+
         FileSystem.on("change", _clearCachedHints);
         FileSystem.on("rename", _clearCachedHints);
 
